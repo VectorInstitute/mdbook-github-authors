@@ -62,7 +62,15 @@ impl<'a> AuthorLink<'a> {
             }
             _ => None,
         };
-        todo!()
+
+        link_type.and_then(|lnk_type| {
+            cap.get(0).map(|mat| AuthorLink {
+                start_index: mat.start(),
+                end_index: mat.end(),
+                link_type: lnk_type,
+                input: mat.as_str(),
+            })
+        })
     }
 }
 
