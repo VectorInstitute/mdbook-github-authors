@@ -6,6 +6,7 @@ authors = ["Andrei Fajardo <andrei.fajardo@vectorinstitute.ai>"]
 description = "mdbook preprocessor to display Github profiles of authors of a page"
 license = "MIT"
 repository = "https://github.com/VectorInstitute/mdbook-github-authors"
+exclude = ["/test_book"]
 
 [dependencies]
 anyhow = "1.0.95"
