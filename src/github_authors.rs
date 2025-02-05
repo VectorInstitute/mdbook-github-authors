@@ -41,17 +41,20 @@ impl Preprocessor for GithubAuthorsPreprocessor {
 
                 // get contributors html section
                 let mut data = Map::new();
-                data.insert("authors".to_string(), to_json(github_authors));
+                if !github_authors.is_empty() {
+                    data.insert("authors".to_string(), to_json(github_authors));
+                }
                 let mut handlebars = Handlebars::new();
 
                 // register template from a file and assign a name to it
                 handlebars
-                    .register_template_file("contributors", "./template/author.hbs")
+                    .register_template_file("contributors", "../src/template/authors.hbs")
                     .unwrap();
 
-                let contributors_html = handlebars.render("contributors", &data).unwrap();
-                println!("{:?}", contributors_html);
-                content.push_str(contributors_html.as_str());
+                if !data.is_empty() {
+                    let contributors_html = handlebars.render("contributors", &data).unwrap();
+                    content.push_str(contributors_html.as_str());
+                }
 
                 // mutate chapter content
                 ch.content = content;

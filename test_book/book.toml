@@ -6,4 +6,4 @@ src = "src"
 title = "github-authors"
 
 [preprocessor.github-authors]
-command = "cargo run --manifest-path=Cargo.toml --locked"
+command = "cargo run --manifest-path=../Cargo.toml --locked"

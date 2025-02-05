@@ -10,6 +10,7 @@ exclude = ["/test_book"]
 
 [dependencies]
 anyhow = "1.0.95"
+clap = "4.5.28"
 handlebars = "6.3.0"
 mdbook = "0.4.44"
 once_cell = "1.20.2"
