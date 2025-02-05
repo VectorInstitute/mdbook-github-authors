@@ -29,6 +29,7 @@ impl Preprocessor for GithubAuthorsPreprocessor {
         // 2. Sequentially erase all authors helpers from the content
         // 3. Use handlebar template `authors.hbs` and render the found authors
         // 4. Take the rendered html string and add it to the end of the chapter content
+        // 5. Figure out if need to make a cli for this and use CmdPreprocessor
         todo!()
     }
 }
