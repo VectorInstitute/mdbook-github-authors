@@ -25,7 +25,7 @@ impl Preprocessor for GithubAuthorsPreprocessor {
     #[allow(unused_variables)]
     fn run(&self, ctx: &PreprocessorContext, book: Book) -> anyhow::Result<Book> {
         // Gameplan:
-        // 1. Find all authors helper using reg-ex in chapter content, using `find_authors`
+        // 1. Find all authors helper using reg-ex in chapter content, using `find_author_links`
         // 2. Sequentially erase all authors helpers from the content
         // 3. Use handlebar template `authors.hbs` and render the found authors
         // 4. Take the rendered html string and add it to the end of the chapter content
@@ -54,10 +54,14 @@ impl<'a> AuthorLink<'a> {
     #[allow(dead_code, unused_variables)]
     fn from_capture(cap: Captures<'a>) -> Option<AuthorLink<'a>> {
         let link_type = match (cap.get(0), cap.get(1), cap.get(2)) {
-            (_, Some(typ), Some(author)) if typ.as_str() == "author" => {
+            (_, Some(typ), Some(author))
+                if ((typ.as_str() == "author") && (!author.as_str().trim().is_empty())) =>
+            {
                 Some(AuthorLinkType::SingleAuthor(author.as_str()))
             }
-            (_, Some(typ), Some(authors_list)) if typ.as_str() == "authors" => {
+            (_, Some(typ), Some(authors_list))
+                if ((typ.as_str() == "authors") && (!authors_list.as_str().trim().is_empty())) =>
+            {
                 Some(AuthorLinkType::MultipleAuthors(authors_list.as_str()))
             }
             _ => None,
@@ -90,7 +94,7 @@ impl<'a> Iterator for AuthorLinkIter<'a> {
 }
 
 #[allow(dead_code)]
-fn find_authors(contents: &str) -> AuthorLinkIter<'_> {
+fn find_author_links(contents: &str) -> AuthorLinkIter<'_> {
     // lazily compute following regex
     // r"\\\{\{#.*\}\}|\{\{#([a-zA-Z0-9]+)\s*([^}]+)\}\}")?;
     static RE: Lazy<Regex> = Lazy::new(|| {
@@ -108,4 +112,44 @@ fn find_authors(contents: &str) -> AuthorLinkIter<'_> {
     });
 
     AuthorLinkIter(RE.captures_iter(contents))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use anyhow::Result;
+    use rstest::*;
+
+    #[rstest]
+    fn test_find_links_no_author_links() -> Result<()> {
+        let s = "Some random text without link...";
+        assert!(find_author_links(s).collect::<Vec<_>>() == vec![]);
+        Ok(())
+    }
+
+    #[rstest]
+    fn test_find_links_partial_link() -> Result<()> {
+        let s = "Some random text with {{#playground...";
+        assert!(find_author_links(s).collect::<Vec<_>>() == vec![]);
+        let s = "Some random text with {{#include...";
+        assert!(find_author_links(s).collect::<Vec<_>>() == vec![]);
+        let s = "Some random text with \\{{#include...";
+        assert!(find_author_links(s).collect::<Vec<_>>() == vec![]);
+        Ok(())
+    }
+
+    #[rstest]
+    fn test_find_links_empty_link() -> Result<()> {
+        let s = "Some random text with {{#author  }} and {{#authors   }} {{}} {{#}}...";
+        println!("{:?}", find_author_links(s).collect::<Vec<_>>());
+        assert!(find_author_links(s).collect::<Vec<_>>() == vec![]);
+        Ok(())
+    }
+
+    #[rstest]
+    fn test_find_links_unknown_link_type() -> Result<()> {
+        let s = "Some random text with {{#my_author ar.rs}} and {{#auth}} {{baz}} {{#bar}}...";
+        assert!(find_author_links(s).collect::<Vec<_>>() == vec![]);
+        Ok(())
+    }
 }
