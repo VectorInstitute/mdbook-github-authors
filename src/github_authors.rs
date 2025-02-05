@@ -1,4 +1,4 @@
-use mdbook::book::Book;
+use mdbook::book::{Book, BookItem};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use once_cell::sync::Lazy;
 use regex::{CaptureMatches, Captures, Regex};
@@ -23,25 +23,83 @@ impl Preprocessor for GithubAuthorsPreprocessor {
     }
 
     #[allow(unused_variables)]
-    fn run(&self, ctx: &PreprocessorContext, book: Book) -> anyhow::Result<Book> {
+    fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> anyhow::Result<Book> {
         // Gameplan:
         // 1. Find all authors helper using reg-ex in chapter content, using `find_author_links`
         // 2. Sequentially erase all authors helpers from the content
         // 3. Use handlebar template `authors.hbs` and render the found authors
         // 4. Take the rendered html string and add it to the end of the chapter content
         // 5. Figure out if need to make a cli for this and use CmdPreprocessor
-        todo!()
+        let src_dir = ctx.root.join(&ctx.config.book.src);
+
+        book.for_each_mut(|section: &mut BookItem| {
+            if let BookItem::Chapter(ref mut ch) = *section {
+                if let Some(ref chapter_path) = ch.path {
+                    let base = chapter_path
+                        .parent()
+                        .map(|dir| src_dir.join(dir))
+                        .expect("All book items have a parent");
+
+                    let (mut content, github_authors) = remove_all_links(&ch.content);
+
+                    // get contributors html template
+                    let contributors_html = "";
+                    content.push_str(contributors_html);
+
+                    // mutate chapter content
+                    ch.content = content;
+                }
+            }
+        });
+
+        Ok(book)
     }
 }
 
-#[allow(dead_code)]
+fn remove_all_links(s: &str) -> (String, Vec<GithubAuthor>) {
+    let mut previous_end_index = 0;
+    let mut replaced = String::new();
+    let mut github_authors_vec = vec![];
+
+    for link in find_author_links(s) {
+        // remove the author link from the chapter content
+        replaced.push_str(&s[previous_end_index..link.start_index]);
+        replaced.push_str("");
+        previous_end_index = link.end_index;
+
+        // store the author usernames to create the contributors section with handlebars
+        let these_authors = match link.link_type {
+            AuthorLinkType::SingleAuthor(author) => {
+                vec![GithubAuthor {
+                    username: author.to_string(),
+                }]
+            }
+            AuthorLinkType::MultipleAuthors(author_list) => author_list
+                .split(",")
+                .map(|username| GithubAuthor {
+                    username: username.to_string(),
+                })
+                .collect(),
+        };
+
+        github_authors_vec.extend(these_authors);
+    }
+
+    replaced.push_str(&s[previous_end_index..]);
+    (replaced, github_authors_vec)
+}
+
+#[derive(PartialEq, Debug, Clone)]
+pub struct GithubAuthor {
+    username: String,
+}
+
 #[derive(PartialEq, Debug, Clone)]
 enum AuthorLinkType<'a> {
     SingleAuthor(&'a str),
     MultipleAuthors(&'a str),
 }
 
-#[allow(dead_code)]
 #[derive(PartialEq, Debug, Clone)]
 struct AuthorLink<'a> {
     start_index: usize,
@@ -51,7 +109,6 @@ struct AuthorLink<'a> {
 }
 
 impl<'a> AuthorLink<'a> {
-    #[allow(dead_code, unused_variables)]
     fn from_capture(cap: Captures<'a>) -> Option<AuthorLink<'a>> {
         let link_type = match (cap.get(0), cap.get(1), cap.get(2)) {
             (_, Some(typ), Some(author))
