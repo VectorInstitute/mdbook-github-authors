@@ -38,7 +38,7 @@ impl Preprocessor for GithubAuthorsPreprocessor {
 #[derive(PartialEq, Debug, Clone)]
 enum AuthorLinkType<'a> {
     SingleAuthor(&'a str),
-    AuthorsList(&'a str),
+    MultipleAuthors(&'a str),
 }
 
 #[allow(dead_code)]
@@ -46,12 +46,22 @@ enum AuthorLinkType<'a> {
 struct AuthorLink<'a> {
     start_index: usize,
     end_index: usize,
+    link_type: AuthorLinkType<'a>,
     input: &'a str,
 }
 
 impl<'a> AuthorLink<'a> {
     #[allow(dead_code, unused_variables)]
     fn from_capture(cap: Captures<'a>) -> Option<AuthorLink<'a>> {
+        let link_type = match (cap.get(0), cap.get(1), cap.get(2)) {
+            (_, Some(typ), Some(author)) if typ.as_str() == "author" => {
+                Some(AuthorLinkType::SingleAuthor(author.as_str()))
+            }
+            (_, Some(typ), Some(authors_list)) if typ.as_str() == "authors" => {
+                Some(AuthorLinkType::MultipleAuthors(authors_list.as_str()))
+            }
+            _ => None,
+        };
         todo!()
     }
 }
