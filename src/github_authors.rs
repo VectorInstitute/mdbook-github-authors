@@ -27,7 +27,8 @@ impl Preprocessor for GithubAuthorsPreprocessor {
         // Gameplan:
         // 1. Find all authors helper using reg-ex in chapter content, using `find_authors`
         // 2. Sequentially erase all authors helpers from the content
-        // 3. Use handlebar template to augment the chapter with the `authors.hbs` template
+        // 3. Use handlebar template `authors.hbs` and render the found authors
+        // 4. Take the rendered html string and add it to the end of the chapter content
         todo!()
     }
 }
