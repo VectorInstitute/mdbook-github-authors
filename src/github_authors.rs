@@ -36,27 +36,34 @@ impl Preprocessor for GithubAuthorsPreprocessor {
 
 #[allow(dead_code)]
 #[derive(PartialEq, Debug, Clone)]
-struct Author<'a> {
-    start_index: usize,
-    end_index: usize,
-    github_username: &'a str,
+enum AuthorLinkType<'a> {
+    SingleAuthor(&'a str),
+    AuthorsList(&'a str),
 }
 
-impl<'a> Author<'a> {
+#[allow(dead_code)]
+#[derive(PartialEq, Debug, Clone)]
+struct AuthorLink<'a> {
+    start_index: usize,
+    end_index: usize,
+    input: &'a str,
+}
+
+impl<'a> AuthorLink<'a> {
     #[allow(dead_code, unused_variables)]
-    fn from_capture(cap: Captures<'a>) -> Option<Author<'a>> {
+    fn from_capture(cap: Captures<'a>) -> Option<AuthorLink<'a>> {
         todo!()
     }
 }
 
 #[allow(dead_code)]
-struct AuthorIter<'a>(CaptureMatches<'a, 'a>);
+struct AuthorLinkIter<'a>(CaptureMatches<'a, 'a>);
 
-impl<'a> Iterator for AuthorIter<'a> {
-    type Item = Author<'a>;
-    fn next(&mut self) -> Option<Author<'a>> {
+impl<'a> Iterator for AuthorLinkIter<'a> {
+    type Item = AuthorLink<'a>;
+    fn next(&mut self) -> Option<AuthorLink<'a>> {
         for cap in &mut self.0 {
-            if let Some(inc) = Author::from_capture(cap) {
+            if let Some(inc) = AuthorLink::from_capture(cap) {
                 return Some(inc);
             }
         }
@@ -65,7 +72,7 @@ impl<'a> Iterator for AuthorIter<'a> {
 }
 
 #[allow(dead_code)]
-fn find_authors(contents: &str) -> AuthorIter<'_> {
+fn find_authors(contents: &str) -> AuthorLinkIter<'_> {
     // lazily compute following regex
     // r"\\\{\{#.*\}\}|\{\{#([a-zA-Z0-9]+)\s*([^}]+)\}\}")?;
     static RE: Lazy<Regex> = Lazy::new(|| {
@@ -82,5 +89,5 @@ fn find_authors(contents: &str) -> AuthorIter<'_> {
         .unwrap()
     });
 
-    AuthorIter(RE.captures_iter(contents))
+    AuthorLinkIter(RE.captures_iter(contents))
 }
