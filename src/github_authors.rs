@@ -5,6 +5,9 @@ use once_cell::sync::Lazy;
 use regex::{CaptureMatches, Captures, Regex};
 use serde::Serialize;
 use serde_json::value::Map;
+use std::include_str;
+
+const CONTRIBUTORS_TEMPLATE: &str = include_str!("./template/authors.hbs");
 
 #[derive(Default)]
 pub struct GithubAuthorsPreprocessor;
@@ -48,7 +51,7 @@ impl Preprocessor for GithubAuthorsPreprocessor {
 
                 // register template from a file and assign a name to it
                 handlebars
-                    .register_template_file("contributors", "../src/template/authors.hbs")
+                    .register_template_string("contributors", CONTRIBUTORS_TEMPLATE)
                     .unwrap();
 
                 if !data.is_empty() {
