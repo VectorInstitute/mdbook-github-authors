@@ -2,5 +2,13 @@
 name = "mdbook-github-authors"
 version = "0.1.0"
 edition = "2021"
+authors = ["Andrei Fajardo <andrei.fajardo@vectorinstitute.ai>"]
+description = "mdbook preprocessor to display Github profiles of authors of a page"
+license = "MIT"
+repository = "https://github.com/VectorInstitute/mdbook-github-authors"
 
 [dependencies]
+anyhow = "1.0.95"
+mdbook = "0.4.44"
+serde = "1.0.217"
+serde_json = "1.0.138"
