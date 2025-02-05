@@ -34,21 +34,14 @@ impl Preprocessor for GithubAuthorsPreprocessor {
 
         book.for_each_mut(|section: &mut BookItem| {
             if let BookItem::Chapter(ref mut ch) = *section {
-                if let Some(ref chapter_path) = ch.path {
-                    let base = chapter_path
-                        .parent()
-                        .map(|dir| src_dir.join(dir))
-                        .expect("All book items have a parent");
+                let (mut content, github_authors) = remove_all_links(&ch.content);
 
-                    let (mut content, github_authors) = remove_all_links(&ch.content);
+                // get contributors html template
+                let contributors_html = "";
+                content.push_str(contributors_html);
 
-                    // get contributors html template
-                    let contributors_html = "";
-                    content.push_str(contributors_html);
-
-                    // mutate chapter content
-                    ch.content = content;
-                }
+                // mutate chapter content
+                ch.content = content;
             }
         });
 
