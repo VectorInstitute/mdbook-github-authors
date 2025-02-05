@@ -156,7 +156,7 @@ mod tests {
     }
 
     #[rstest]
-    fn test_find_links_simple_author_link() -> Result<()> {
+    fn test_find_links_simple_author_links() -> Result<()> {
         let s = "Some random text with {{#author foo}} and {{#authors bar,baz  }}...";
 
         let res = find_author_links(s).collect::<Vec<_>>();
