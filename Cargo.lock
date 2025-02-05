@@ -1152,7 +1152,10 @@ name = "mdbook-github-authors"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "handlebars",
  "mdbook",
+ "once_cell",
+ "regex",
  "serde",
  "serde_json",
 ]
