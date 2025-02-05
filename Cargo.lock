@@ -1164,6 +1164,7 @@ name = "mdbook-github-authors"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "clap",
  "handlebars",
  "mdbook",
  "once_cell",

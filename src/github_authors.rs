@@ -1,7 +1,13 @@
+use handlebars::{to_json, Handlebars};
 use mdbook::book::{Book, BookItem};
 use mdbook::preprocess::{Preprocessor, PreprocessorContext};
 use once_cell::sync::Lazy;
 use regex::{CaptureMatches, Captures, Regex};
+use serde::Serialize;
+use serde_json::value::Map;
+use std::include_str;
+
+const CONTRIBUTORS_TEMPLATE: &str = include_str!("./template/authors.hbs");
 
 #[derive(Default)]
 pub struct GithubAuthorsPreprocessor;
@@ -36,9 +42,22 @@ impl Preprocessor for GithubAuthorsPreprocessor {
             if let BookItem::Chapter(ref mut ch) = *section {
                 let (mut content, github_authors) = remove_all_links(&ch.content);
 
-                // get contributors html template
-                let contributors_html = "";
-                content.push_str(contributors_html);
+                // get contributors html section
+                let mut data = Map::new();
+                if !github_authors.is_empty() {
+                    data.insert("authors".to_string(), to_json(github_authors));
+                }
+                let mut handlebars = Handlebars::new();
+
+                // register template from a file and assign a name to it
+                handlebars
+                    .register_template_string("contributors", CONTRIBUTORS_TEMPLATE)
+                    .unwrap();
+
+                if !data.is_empty() {
+                    let contributors_html = handlebars.render("contributors", &data).unwrap();
+                    content.push_str(contributors_html.as_str());
+                }
 
                 // mutate chapter content
                 ch.content = content;
@@ -82,7 +101,7 @@ fn remove_all_links(s: &str) -> (String, Vec<GithubAuthor>) {
     (replaced, github_authors_vec)
 }
 
-#[derive(PartialEq, Debug, Clone)]
+#[derive(PartialEq, Debug, Clone, Serialize)]
 pub struct GithubAuthor {
     username: String,
 }
