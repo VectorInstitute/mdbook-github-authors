@@ -181,7 +181,7 @@ mod tests {
 
     #[fixture]
     fn simple_book_content() -> String {
-        "Some random text with {{#author foo}} and {{#authors bar,baz  }}...".to_string()
+        "Some random text with and more text ... {{#author foo}} {{#authors bar,baz  }}".to_string()
     }
 
     #[rstest]
@@ -226,17 +226,39 @@ mod tests {
             res,
             vec![
                 AuthorLink {
-                    start_index: 22,
-                    end_index: 37,
+                    start_index: 40,
+                    end_index: 55,
                     link_type: AuthorLinkType::SingleAuthor("foo"),
                     link_text: "{{#author foo}}",
                 },
                 AuthorLink {
-                    start_index: 42,
-                    end_index: 64,
+                    start_index: 56,
+                    end_index: 78,
                     link_type: AuthorLinkType::MultipleAuthors("bar,baz"),
                     link_text: "{{#authors bar,baz  }}",
                 },
+            ]
+        );
+        Ok(())
+    }
+
+    #[rstest]
+    fn test_remove_all_links(simple_book_content: String) -> Result<()> {
+        let (c, authors) = remove_all_links(&simple_book_content[..]);
+
+        assert_eq!(c, "Some random text with and more text ...  ");
+        assert_eq!(
+            authors,
+            vec![
+                GithubAuthor {
+                    username: "foo".to_string()
+                },
+                GithubAuthor {
+                    username: "bar".to_string()
+                },
+                GithubAuthor {
+                    username: "baz".to_string()
+                }
             ]
         );
         Ok(())
