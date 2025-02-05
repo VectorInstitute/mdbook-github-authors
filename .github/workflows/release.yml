@@ -27,7 +27,7 @@ jobs:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CRATES_TOKEN }}
 
   release_github:
-    needs: publish_crate 
+    needs: publish_crate
     runs-on: ubuntu-latest
     steps:
       - name: Create GitHub Release
@@ -39,4 +39,4 @@ jobs:
           tag_name: ${{ github.ref }}
           release_name: ${{ github.ref }}
           draft: false
-          prerelease: false 
+          prerelease: false

@@ -26,5 +26,5 @@ jobs:
           ~/.cargo/git/db/
           target/
         key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-    - name: Lint 
+    - name: Lint
       run: cargo clippy --verbose
