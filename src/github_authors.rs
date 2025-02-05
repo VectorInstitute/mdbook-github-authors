@@ -47,7 +47,7 @@ struct AuthorLink<'a> {
     start_index: usize,
     end_index: usize,
     link_type: AuthorLinkType<'a>,
-    input: &'a str,
+    link_text: &'a str,
 }
 
 impl<'a> AuthorLink<'a> {
@@ -57,12 +57,14 @@ impl<'a> AuthorLink<'a> {
             (_, Some(typ), Some(author))
                 if ((typ.as_str() == "author") && (!author.as_str().trim().is_empty())) =>
             {
-                Some(AuthorLinkType::SingleAuthor(author.as_str()))
+                Some(AuthorLinkType::SingleAuthor(author.as_str().trim()))
             }
             (_, Some(typ), Some(authors_list))
                 if ((typ.as_str() == "authors") && (!authors_list.as_str().trim().is_empty())) =>
             {
-                Some(AuthorLinkType::MultipleAuthors(authors_list.as_str()))
+                Some(AuthorLinkType::MultipleAuthors(
+                    authors_list.as_str().trim(),
+                ))
             }
             _ => None,
         };
@@ -72,7 +74,7 @@ impl<'a> AuthorLink<'a> {
                 start_index: mat.start(),
                 end_index: mat.end(),
                 link_type: lnk_type,
-                input: mat.as_str(),
+                link_text: mat.as_str(),
             })
         })
     }
@@ -150,6 +152,33 @@ mod tests {
     fn test_find_links_unknown_link_type() -> Result<()> {
         let s = "Some random text with {{#my_author ar.rs}} and {{#auth}} {{baz}} {{#bar}}...";
         assert!(find_author_links(s).collect::<Vec<_>>() == vec![]);
+        Ok(())
+    }
+
+    #[rstest]
+    fn test_find_links_simple_author_link() -> Result<()> {
+        let s = "Some random text with {{#author foo}} and {{#authors bar,baz  }}...";
+
+        let res = find_author_links(s).collect::<Vec<_>>();
+        println!("\nOUTPUT: {res:?}\n");
+
+        assert_eq!(
+            res,
+            vec![
+                AuthorLink {
+                    start_index: 22,
+                    end_index: 37,
+                    link_type: AuthorLinkType::SingleAuthor("foo"),
+                    link_text: "{{#author foo}}",
+                },
+                AuthorLink {
+                    start_index: 42,
+                    end_index: 64,
+                    link_type: AuthorLinkType::MultipleAuthors("bar,baz"),
+                    link_text: "{{#authors bar,baz  }}",
+                },
+            ]
+        );
         Ok(())
     }
 }
