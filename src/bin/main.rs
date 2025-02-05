@@ -20,8 +20,8 @@ fn main() {
 }
 
 fn make_app() -> Command {
-    Command::new("mdbook-cmdrun")
-        .about("mdbook preprocessor to run arbitrary commands and replace the stdout of these commands inside the markdown file.")
+    Command::new("mdbook-github-authors")
+        .about("mdbook preprocessor for listing Chapter authors via their Github profiles.")
         .subcommand(
             Command::new("supports")
                 .arg(Arg::new("renderer").required(true))
@@ -34,7 +34,7 @@ fn handle_preprocessing() -> Result<(), Error> {
 
     if ctx.mdbook_version != mdbook::MDBOOK_VERSION {
         eprintln!(
-            "Warning: The mdbook-cmdrun preprocessor was built against version \
+            "Warning: The mdbook-github-authors preprocessor was built against version \
              {} of mdbook, but we're being called from version {}",
             mdbook::MDBOOK_VERSION,
             ctx.mdbook_version
