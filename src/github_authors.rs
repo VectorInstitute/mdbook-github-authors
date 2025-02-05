@@ -179,6 +179,11 @@ mod tests {
     use anyhow::Result;
     use rstest::*;
 
+    #[fixture]
+    fn simple_book_content() -> String {
+        "Some random text with {{#author foo}} and {{#authors bar,baz  }}...".to_string()
+    }
+
     #[rstest]
     fn test_find_links_no_author_links() -> Result<()> {
         let s = "Some random text without link...";
@@ -213,10 +218,8 @@ mod tests {
     }
 
     #[rstest]
-    fn test_find_links_simple_author_links() -> Result<()> {
-        let s = "Some random text with {{#author foo}} and {{#authors bar,baz  }}...";
-
-        let res = find_author_links(s).collect::<Vec<_>>();
+    fn test_find_links_simple_author_links(simple_book_content: String) -> Result<()> {
+        let res = find_author_links(&simple_book_content[..]).collect::<Vec<_>>();
         println!("\nOUTPUT: {res:?}\n");
 
         assert_eq!(
