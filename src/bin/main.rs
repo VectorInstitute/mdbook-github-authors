@@ -1,32 +1,57 @@
-use clap::{Arg, ArgMatches, Command};
+use anyhow::Result;
+use clap::{Parser, Subcommand};
 use mdbook::errors::Error;
 use mdbook::preprocess::CmdPreprocessor;
 use mdbook::preprocess::Preprocessor;
-
+use mdbook_github_authors::GithubAuthorsPreprocessor;
 use std::io;
 use std::process;
 
-use mdbook_github_authors::GithubAuthorsPreprocessor;
+/// mdbook preprocessor to create an authors section for every Chapter
+#[derive(Parser)]
+#[command(author, version, about, long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Option<Commands>,
+}
+
+#[derive(Debug, Subcommand)]
+enum Commands {
+    /// Check whether a renderer is supported by this preprocessor
+    Supports { renderer: String },
+}
 
 fn main() {
-    let matches = make_app().get_matches();
+    env_logger::init_from_env(env_logger::Env::default().default_filter_or("info"));
 
-    if let Some(sub_args) = matches.subcommand_matches("supports") {
-        handle_supports(sub_args);
-    } else if let Err(e) = handle_preprocessing() {
-        eprintln!("{e}");
+    let cli = Cli::parse();
+    if let Err(error) = run(cli) {
+        log::error!("Fatal error: {}", error);
+        for error in error.chain() {
+            log::error!("  - {}", error);
+        }
         process::exit(1);
     }
 }
 
-fn make_app() -> Command {
-    Command::new("mdbook-github-authors")
-        .about("mdbook preprocessor for listing Chapter authors via their Github profiles.")
-        .subcommand(
-            Command::new("supports")
-                .arg(Arg::new("renderer").required(true))
-                .about("Check whether a renderer is supported by this preprocessor"),
-        )
+fn run(cli: Cli) -> Result<()> {
+    match cli.command {
+        None => handle_preprocessing(),
+        Some(Commands::Supports { renderer }) => {
+            handle_supports(renderer);
+        }
+    }
+}
+
+fn handle_supports(renderer: String) -> ! {
+    let supported = GithubAuthorsPreprocessor.supports_renderer(&renderer);
+
+    // Signal whether the renderer is supported by exiting with 1 or 0.
+    if supported {
+        process::exit(0);
+    } else {
+        process::exit(1);
+    }
 }
 
 fn handle_preprocessing() -> Result<(), Error> {
@@ -45,18 +70,4 @@ fn handle_preprocessing() -> Result<(), Error> {
     serde_json::to_writer(io::stdout(), &processed_book)?;
 
     Ok(())
-}
-
-fn handle_supports(sub_args: &ArgMatches) -> ! {
-    let renderer = sub_args
-        .get_one::<String>("renderer")
-        .expect("Required argument");
-    let supported = GithubAuthorsPreprocessor.supports_renderer(renderer);
-
-    // Signal whether the renderer is supported by exiting with 1 or 0.
-    if supported {
-        process::exit(0);
-    } else {
-        process::exit(1);
-    }
 }
