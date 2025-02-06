@@ -1,3 +1,3 @@
 # Sub Chapter 1
 
-{{#author nerdai}}
+This page has no authors.
