@@ -36,6 +36,11 @@ command = "mdbook-github-authors"
 {{#authors username1,username2,username3}}
 ```
 
+> [!NOTE]
+> Rather than expanding in-place, this preprocessor adds a stylized Contributor
+> section to the bottom of the Chapter, irrespective of where these author helpers
+> are found in the raw markdown file.
+
 The preprocessor will generate a "Contributors" section at the bottom of each chapter
 listing the GitHub profiles of specified authors.
 
@@ -52,5 +57,3 @@ Content here...
 Will render as:
 
 <img width="924" alt="image" src="https://github.com/user-attachments/assets/c0018fc9-eb1e-4901-a780-ca1d31d449de" />
-
-
