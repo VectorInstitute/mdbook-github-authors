@@ -28,16 +28,7 @@ impl Preprocessor for GithubAuthorsPreprocessor {
         Self::NAME
     }
 
-    #[allow(unused_variables)]
-    fn run(&self, ctx: &PreprocessorContext, mut book: Book) -> anyhow::Result<Book> {
-        // Gameplan:
-        // 1. Find all authors helper using reg-ex in chapter content, using `find_author_links`
-        // 2. Sequentially erase all authors helpers from the content
-        // 3. Use handlebar template `authors.hbs` and render the found authors
-        // 4. Take the rendered html string and add it to the end of the chapter content
-        // 5. Figure out if need to make a cli for this and use CmdPreprocessor
-        let src_dir = ctx.root.join(&ctx.config.book.src);
-
+    fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> anyhow::Result<Book> {
         book.for_each_mut(|section: &mut BookItem| {
             if let BookItem::Chapter(ref mut ch) = *section {
                 let (mut content, github_authors) = remove_all_links(&ch.content);
@@ -149,7 +140,6 @@ impl<'a> AuthorLink<'a> {
     }
 }
 
-#[allow(dead_code)]
 struct AuthorLinkIter<'a>(CaptureMatches<'a, 'a>);
 
 impl<'a> Iterator for AuthorLinkIter<'a> {
@@ -164,7 +154,6 @@ impl<'a> Iterator for AuthorLinkIter<'a> {
     }
 }
 
-#[allow(dead_code)]
 fn find_author_links(contents: &str) -> AuthorLinkIter<'_> {
     // lazily compute following regex
     // r"\\\{\{#.*\}\}|\{\{#([a-zA-Z0-9]+)\s*([^}]+)\}\}")?;
