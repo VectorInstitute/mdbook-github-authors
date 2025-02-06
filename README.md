@@ -7,6 +7,7 @@
 [![Test Lib](https://github.com/VectorInstitute/mdbook-github-authors/actions/workflows/test.yml/badge.svg)](https://github.com/VectorInstitute/mdbook-github-authors/actions/workflows/test.yml)
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/mdbook-github-authors)
 ![GitHub Release](https://img.shields.io/github/v/release/VectorInstitute/mdbook-github-authors)
+![docs.rs](https://img.shields.io/docsrs/mdbook-github-authors)
 
 A preprocessor for [mdbook](https://rust-lang.github.io/mdBook/) that creates
 chapter-level contributor sections featuring authors' GitHub profiles.
