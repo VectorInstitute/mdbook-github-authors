@@ -12,12 +12,21 @@ const CONTRIBUTORS_TEMPLATE: &str = include_str!("./template/authors.hbs");
 #[derive(Default)]
 pub struct GithubAuthorsPreprocessor;
 
-/// A preprocess for expanding "authors" helper.
+/// A preprocessor for expanding "authors" helper.
 ///
-/// {{#author <github-username>}}
+/// NOTE: rather than expanding, this preprocessor adds a stylized Contributor section to
+/// the bottom of the Chapter, irrespective of where these author helpers are found in
+/// the raw markdown file.
+///
+/// Supported helpers are:
+///
+/// - `{{#author <github-username>}}` - Adds a single author to the Contributor section
+/// - `{{#authors <comma-separated-username-list>}}` - Adds listed authors to the
+///   Contributor section.
 impl GithubAuthorsPreprocessor {
     pub(crate) const NAME: &'static str = "github-author";
 
+    /// Create a new `GithubAuthorsPreprocessor`.
     pub fn new() -> Self {
         GithubAuthorsPreprocessor
     }
@@ -29,6 +38,8 @@ impl Preprocessor for GithubAuthorsPreprocessor {
     }
 
     fn run(&self, _ctx: &PreprocessorContext, mut book: Book) -> anyhow::Result<Book> {
+        // This run method's implementation follows the implementation of
+        // mdbook::preprocess::links::LinkPreprocessor.run().
         book.for_each_mut(|section: &mut BookItem| {
             if let BookItem::Chapter(ref mut ch) = *section {
                 let (mut content, github_authors) = remove_all_links(&ch.content);
@@ -60,6 +71,11 @@ impl Preprocessor for GithubAuthorsPreprocessor {
 }
 
 fn remove_all_links(s: &str) -> (String, Vec<GithubAuthor>) {
+    // This implementation follows closely to the implementation of
+    // mdbook::preprocess::links::replace_all.
+    // This removes all found author helpers and returns a Vec of `GithubAuthor`
+    // that are used later to render the Contributors section appended to the end
+    // of the Chapter's content.
     let mut previous_end_index = 0;
     let mut replaced = String::new();
     let mut github_authors_vec = vec![];
