@@ -50,3 +50,7 @@ Content here...
 ```
 
 Will render as:
+
+<img width="924" alt="image" src="https://github.com/user-attachments/assets/c0018fc9-eb1e-4901-a780-ca1d31d449de" />
+
+
