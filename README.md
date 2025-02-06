@@ -8,4 +8,45 @@
 ![GitHub License](https://img.shields.io/github/license/VectorInstitute/mdbook-github-authors)
 ![GitHub Release](https://img.shields.io/github/v/release/VectorInstitute/mdbook-github-authors)
 
-An mdbook preprocessor for easily listing authors of a given page using their Github profiles.
+A preprocessor for [mdbook](https://rust-lang.github.io/mdBook/) that creates
+chapter-level contributor sections featuring authors' GitHub profiles.
+
+## Installation
+
+```bash
+cargo install mdbook-github-authors
+```
+
+## Usage
+
+1. Add to your `book.toml`:
+
+```toml
+[preprocessor.github-authors]
+command = "mdbook-github-authors"
+```
+
+1. Add contributors/authors using these helpers in your markdown:
+
+```markdown
+<!-- Single author -->
+{{#author username}}
+
+<!-- Multiple authors -->
+{{#authors username1,username2,username3}}
+```
+
+The preprocessor will generate a "Contributors" section at the bottom of each chapter
+listing the GitHub profiles of specified authors.
+
+## Examples
+
+```markdown
+# My Chapter
+
+Content here...
+
+{{#authors rust-lang,contributors}}
+```
+
+Will render as:
