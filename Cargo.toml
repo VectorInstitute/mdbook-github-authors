@@ -1,6 +1,6 @@
 [package]
 name = "mdbook-github-authors"
-version = "0.1.0-a0"
+version = "0.1.0"
 edition = "2021"
 authors = ["Andrei Fajardo <andrei.fajardo@vectorinstitute.ai>"]
 description = "mdbook preprocessor to display Github profiles of authors of a page"
