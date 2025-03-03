@@ -17,7 +17,7 @@ name = "mdbook_github_authors"
 path = "src/lib.rs"
 
 [dependencies]
-anyhow = "1.0.96"
+anyhow = "1.0.97"
 clap = { version = "4.5.31", features = ["derive", "std"] }
 env_logger = "0.11.6"
 handlebars = "6.3.1"
